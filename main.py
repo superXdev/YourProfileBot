@@ -1,4 +1,4 @@
-import menu
+import os
 import logging  
 from telegram import (
         InlineKeyboardButton, 
@@ -97,8 +97,10 @@ def error(update, context):
 Bagian untuk menjalankan keseluruhan bot telegram
 '''
 def main():
+    PORT = int(os.environ.get('PORT', '8443'))
+    TOKEN = os.environ.get('TOKEN')
     # Masukkan token bot disini
-    updater = Updater("TOKEN", use_context=True)
+    updater = Updater(TOKEN, use_context=True)
 
     # Daftarkan dispatcher handler
     dp = updater.dispatcher
@@ -117,10 +119,15 @@ def main():
     dp.add_handler(CallbackQueryHandler(profile_menu, pattern='profile'))
 
     # log semua error
-    dp.add_error_handler(menu.error)
+    dp.add_error_handler(error)
 
     # Memulai bot
-    updater.start_polling()
+    updater.start_webhook(listen="0.0.0.0",
+                          port=PORT,
+                          url_path=TOKEN)
+    # updater.bot.set_webhook(url=settings.WEBHOOK_URL)
+    updater.bot.set_webhook('https://shrouded-reef-40362.herokuapp.com/' + TOKEN)
+
     updater.idle()
 
 
